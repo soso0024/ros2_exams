@@ -1,0 +1,26 @@
+ee_twist:
+    type: geometry_msgs/Twist
+    vx:
+        min: -0.5
+        max: .5
+        to: linear.x
+    vy:
+        min: -0.5
+        max: .5
+        to: linear.y
+    vz:
+        min: -0.5
+        max: .5
+        to: linear.z
+    wx:
+        min: -0.5
+        max: .5
+        to: angular.x
+    wy:
+        min: -0.5
+        max: .5
+        to: angular.y
+    wz:
+        min: -0.5
+        max: .5
+        to: angular.z

@@ -1,0 +1,105 @@
+\documentclass{ecnreport}
+
+\stud{OD Robotique 2021-2022 -- groupe A}
+\topic{ROS 2 exam}
+
+\begin{document}
+
+\inserttitle{ROS 2 exam}
+
+\insertsubtitle{2h, documents / internet allowed (closed chats please)}
+
+\section{Description}
+
+In this exam you will have to write a C++ node and run it two times through a launch file.\\
+As usual with ROS exams at Centrale, a few mobile robots are placed in a map and should follow each other.\\
+
+Your code is to be uploaded on \link{https://script.google.com/macros/s/AKfycbxBl4FmCNsBEObazWDQ1VFtOtou8GZ0gBPNWZ5PYAzYPkGlHNpvEp_qeQ/exec}{this dropbox} on the ROS section.\\
+
+The package should first be compiled, then the simulation can be run once and for all with:
+\begin{bashcodelarge}
+ ros2 launch ecn_exam_2021 simulation_launch.py
+\end{bashcodelarge}
+If you need to reset the simulation at some point because the robots have gone who knows where, you can let the simulation run and just launch (in another terminal):
+\begin{bashcodelarge}
+ ros2 launch ecn_exam_2021 reset_launch.py
+\end{bashcodelarge}
+
+In this simulation, three turtlebot robots are spawned with a laser scanner. The goal is to control robots 2 and 3 (namespaced as \okttt{/turtlebot2_test} and \okttt{/turtlebot3}) so that they follow, at a given distance, the nearest object they detect with their laser scanner. \\
+
+The nav stack is run for turtlebot1, you can thus have it move by clicking the "2D Goal Pose" button. Ideally, turtlebot1 should approach the others so that they then move together.
+
+\section{Writing the node}
+
+The node is already more or less setup as \okttt{control_node.cpp}. For now it does exactly nothing. The constructor should:
+\begin{enumerate}
+ \item Declare a \okttt{distance} parameter, that should be set (later through a launch file) to 0.5 (for turtlebot2) and 0.8 (for turtlebot3)
+ \item Declare a \okttt{robot_name} parameter that should be either \okttt{turtlebot2} or \okttt{turtlebot3}
+ \item Declare a publisher on the topic \okttt{cmd_vel}
+ \item Declare a subscriber on the topic \okttt{scan}
+ \item Declare a timer that calls the \okttt{move} method every 100 ms.
+\end{enumerate}
+
+When the simulation is running, use command line tools to identify the types of messages that should go on each topic.
+
+
+\subsection{Motion control}
+
+The \okttt{move} method is already declared. This method should:
+\begin{enumerate}
+ \item find the closest point in the latest laser scan message through the \okttt{findClosest} function. This function returns a \okttt{Target} object that is described in the next section (already done)
+ \item have \okttt{target_pub} publish this target. This allows checking in RViz if you have identified the correct closest point (already done)
+ \item build a command message from the target control law:
+ \begin{equation*}\left\{\begin{array}{ll}
+                          v_x &= \texttt{target.computeVx(distance)}\\
+                          \omega_z &= \texttt{target.computeOmegaZ()}\\
+                         \end{array}\right.
+ \end{equation*}
+ \item publish this command message on the \okttt{cmd_vel} topic
+\end{enumerate}
+
+\subsection{Finding the closest point}
+
+The laser scan message is structured as follows:
+\begin{bashcode}
+float32 angle_min            # start angle of the scan [rad]
+float32 angle_max            # end angle of the scan [rad]
+float32 angle_increment      # angular distance between measurements [rad]
+float32 range_min            # minimum range value [m]
+float32 range_max            # maximum range value [m]
+float32[] ranges             # range data [m]
+\end{bashcode}
+
+Assuming the scan message is called \okttt{scan}, ranges are thus stored in \okttt{scan.ranges} as a \okttt{std::vector}.\\
+The range at index $i$ corresponds to the angle \okttt{scan.angle_min + i*scan.angle_increment}.\\
+
+In order to find the closest detected point, you have to loop through the indices and keep the one corresponding to the smallest range, ignoring ranges that are not between \okttt{range_min} and \okttt{range_max}. \\
+Just update \okttt{target.range} and \okttt{target.angle} inside this loop and return \okttt{target}.
+
+\section{The launch file}
+
+Once the node runs correctly for turtlebot2, make it generic and modify \okttt{both_launch.py} so that it runs the node twice:
+\begin{itemize}
+ \item The node controlling turtlebot2 should be run inside the \okttt{/turtlebot2} namespace\\without any remappings, and use a distance of 0.5 m
+ \item The node controlling turtlebot3 should be run inside the global namespace with remappings, and use a distance of 0.8 m
+\end{itemize}
+Do not forget to also set the \okttt{robot_name} parameter when running the nodes.
+
+
+\newpage
+
+\section{Tips}
+
+Compile the code once using \okttt{colbuild --packages-select ecn_exam_2021}. Then, use \okttt{gqt} in the package folder to configure QtCreator. Do not forget to use it with ROS 2 setup.\\
+
+In order to efficiently debug your code, it is strongly advised to write the node only for turtlebot2 first. This node should do all necessary things with hard-coded parameters and topics.\\
+You can then make it generic and run it through the launch file.\\
+
+Feel free to have a look at the \okttt{basic_node.cpp} from the lab templates.\\
+
+Declaring node parameters is detailed in online tutorials and in my slides.\\
+
+You can use the \okttt{simple_launch} package to write the launch files.
+
+
+\end{document}
