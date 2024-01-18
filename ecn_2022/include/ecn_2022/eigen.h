@@ -2,7 +2,7 @@
 #define EXAM_2022_EIGEN_H
 
 #include <eigen3/Eigen/Core>
-#include <ecn_exam_2022/ik_client.h>
+#include <ecn_2022/ik_client.h>
 #include <geometry_msgs/msg/twist.hpp>
 
 // math to meaningfull stuff

@@ -4,7 +4,7 @@
 #include <rclcpp/node.hpp>
 #include <sensor_msgs/msg/point_cloud.hpp>
 
-namespace ecn_exam_2021
+namespace ecn_2021
 {
 
 // helper class
