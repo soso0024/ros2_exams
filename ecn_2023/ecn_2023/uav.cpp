@@ -37,7 +37,7 @@ public:
     client.init("/target");
 
     // TODO init publisher and other things
-    publisher = this->create_publisher<Twist>("cmd_vel", 10);
+    publisher = this->create_publisher<Twist>("/uav1/cmd_vel", 10);
 
     timer = this->create_wall_timer(50ms, std::bind(&UAV::updateControl, this));
 
@@ -62,21 +62,21 @@ public:
     eiy += response.y;
 
     // Compute desired velocity
-    auto twist = Twist();
-    twist.linear.x = Kp * response.x + Ki * eix;
-    twist.linear.y = Kp * response.y + Ki * eiy;
-    twist.linear.z = Kp * response.z;
-    twist.angular.z = Kw * response.theta;
+    auto message = Twist();
+    message.linear.x = Kp * response.x + Ki * eix;
+    message.linear.y = Kp * response.y + Ki * eiy;
+    message.linear.z = Kp * response.z;
+    message.angular.z = Kw * response.theta;
 
     RCLCPP_INFO(this->get_logger(), "response.x: '%f'", response.x);
     RCLCPP_INFO(this->get_logger(), "response.y: '%f'", response.y);
     RCLCPP_INFO(this->get_logger(), "response.z: '%f'", response.z);
 
-    publisher->publish(twist);
+    publisher->publish(message);
 
-    // RCLCPP_INFO(this->get_logger(), "linear.x: '%f'", twist.linear.x);
-    // RCLCPP_INFO(this->get_logger(), "linear.y: '%f'", twist.linear.y);
-    // RCLCPP_INFO(this->get_logger(), "linear.z: '%f'", twist.linear.z);
+    // RCLCPP_INFO(this->get_logger(), "linear.x: '%f'", message.linear.x);
+    // RCLCPP_INFO(this->get_logger(), "linear.y: '%f'", message.linear.y);
+    // RCLCPP_INFO(this->get_logger(), "linear.z: '%f'", message.linear.z);
   }
 
   rclcpp::Publisher<Twist>::SharedPtr publisher;
