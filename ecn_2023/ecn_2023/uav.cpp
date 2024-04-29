@@ -93,6 +93,15 @@ int main(int argc, char** argv)
 }
 
 /*
+<Run Command>
+After Simulation
+
+ros2 run ecn_2023 uav
+
+ros2 run tf2_ros static_transform_publisher 10 0 15 0 0 0 usv/base_link uav1/target
+
+
+
 [ROS2@baxter] ~/ecn_2023$ ros2 service type /target
 ecn_2023/srv/Target
 
