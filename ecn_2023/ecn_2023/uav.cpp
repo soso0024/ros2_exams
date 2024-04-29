@@ -28,8 +28,12 @@ public:
   {
     // control params
     Ki = declare_parameter("Ki", .1);
-    Kp = declare_parameter("Kp", 10.);
-    Kw = declare_parameter("Kw", 5.);
+//    Kp = declare_parameter("Kp", 10.);
+//    Kw = declare_parameter("Kw", 5.);
+
+    // Reduce Oscillations
+    Kp = declare_parameter("Kp", 4.);
+    Kw = declare_parameter("Kw", 1.2);
 
     // TODO declare a parameter for the drone number
     drone_num = declare_parameter("drone_num", 1);
