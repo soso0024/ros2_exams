@@ -3,6 +3,7 @@
 #include <ecn_2023/client_spinner.h>
 #include <ecn_2023/srv/target.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#include <string>
 
 using namespace std::chrono_literals;
 using Target = ecn_2023::srv::Target;
@@ -20,7 +21,7 @@ class UAV : public rclcpp::Node
   double eix{}, eiy{};
 
   // TODO declare additional member variables if needed
-  // int drone_num{};
+  int drone_num{};
 
 public:
   UAV() : Node("uav")
@@ -31,13 +32,14 @@ public:
     Kw = declare_parameter("Kw", 5.);
 
     // TODO declare a parameter for the drone number
-    // drone_num = declare_parameter("drone_num", 1);
+    drone_num = declare_parameter("drone_num", 1);
 
     // TODO init the service client
     client.init("/target");
 
     // TODO init publisher and other things
-    publisher = this->create_publisher<Twist>("/uav1/cmd_vel", 10);
+    auto topic = "uav" + std::to_string(drone_num) + "/cmd_vel";
+    publisher = this->create_publisher<Twist>(topic, 10);
 
     timer = this->create_wall_timer(50ms, std::bind(&UAV::updateControl, this));
 
@@ -47,34 +49,37 @@ public:
   void updateControl(){
     Target::Request request;
     Target::Response response;
+    
+    request.uav = "uav" + std::to_string(drone_num);
+        
+	bool success = client.call(request, response);
+	if (!success)
+	{
+		RCLCPP_ERROR(this->get_logger(), "Failed to call service target");
+		return;
+	}
 
-    request.uav = "uav1";
+	// Integral error for x and y
+	eix += response.x;
+	eiy += response.y;
 
-    bool success = client.call(request, response);
-    if (!success)
-    {
-        RCLCPP_ERROR(this->get_logger(), "Failed to call service target");
-        return;
-    }
+	// Compute desired velocity
+	auto message = Twist();
+	message.linear.x = Kp * response.x + Ki * eix;
+	message.linear.y = Kp * response.y + Ki * eiy;
+	message.linear.z = Kp * response.z;
+	message.angular.z = Kw * response.theta;
+	
+	publisher->publish(message);
+   
 
-    // Integral error for x and y
-    eix += response.x;
-    eiy += response.y;
+    // request.uav = "uav1";
 
-    // Compute desired velocity
-    auto message = Twist();
-    message.linear.x = Kp * response.x + Ki * eix;
-    message.linear.y = Kp * response.y + Ki * eiy;
-    message.linear.z = Kp * response.z;
-    message.angular.z = Kw * response.theta;
+    // RCLCPP_INFO(this->get_logger(), "response.x: '%f'", response.x);
+    // RCLCPP_INFO(this->get_logger(), "response.y: '%f'", response.y);
+    // RCLCPP_INFO(this->get_logger(), "response.z: '%f'", response.z);
 
-    RCLCPP_INFO(this->get_logger(), "response.x: '%f'", response.x);
-    RCLCPP_INFO(this->get_logger(), "response.y: '%f'", response.y);
-    RCLCPP_INFO(this->get_logger(), "response.z: '%f'", response.z);
-
-    publisher->publish(message);
-
-    // RCLCPP_INFO(this->get_logger(), "linear.x: '%f'", message.linear.x);
+    RCLCPP_INFO(this->get_logger(), "linear.x: '%f'", message.linear.x);
     // RCLCPP_INFO(this->get_logger(), "linear.y: '%f'", message.linear.y);
     // RCLCPP_INFO(this->get_logger(), "linear.z: '%f'", message.linear.z);
   }
