@@ -55,7 +55,8 @@ public:
     Target::Response response;
     
     request.uav = "uav" + std::to_string(drone_num);
-        
+
+    // call service and get response
     bool success = client.call(request, response);
     if (!success)
     {
