@@ -56,25 +56,25 @@ public:
     
     request.uav = "uav" + std::to_string(drone_num);
         
-	bool success = client.call(request, response);
-	if (!success)
-	{
-		RCLCPP_ERROR(this->get_logger(), "Failed to call service target");
-		return;
-	}
+    bool success = client.call(request, response);
+    if (!success)
+    {
+	RCLCPP_ERROR(this->get_logger(), "Failed to call service target");
+	return;
+    }
 
-	// Integral error for x and y
-	eix += response.x;
-	eiy += response.y;
+    // Integral error for x and y
+    eix += response.x;
+    eiy += response.y;
 
-	// Compute desired velocity
-	auto message = Twist();
-	message.linear.x = Kp * response.x + Ki * eix;
-	message.linear.y = Kp * response.y + Ki * eiy;
-	message.linear.z = Kp * response.z;
-	message.angular.z = Kw * response.theta;
-	
-	publisher->publish(message);
+    // Compute desired velocity
+    auto message = Twist();
+    message.linear.x = Kp * response.x + Ki * eix;
+    message.linear.y = Kp * response.y + Ki * eiy;
+    message.linear.z = Kp * response.z;
+    message.angular.z = Kw * response.theta;
+
+    publisher->publish(message);
 
     // RCLCPP_INFO(this->get_logger(), "response.x: '%f'", response.x);
     // RCLCPP_INFO(this->get_logger(), "response.y: '%f'", response.y);
