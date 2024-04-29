@@ -35,4 +35,7 @@ def generate_launch_description():
                 executable='static_transform_publisher',
                 arguments=[sl.arg('x' + str(i)), sl.arg('y' + str(i)), sl.arg('z'), sl.arg('yaw'), sl.arg('pitch'), sl.arg('roll'), sl.arg('frame_id'), sl.arg('child_frame'+ str(i))])
 
+    # Or This
+    # sl.include(package = 'ecn_2023', launch_file = 'multi_uav_launch.py')
+
     return sl.launch_description()
