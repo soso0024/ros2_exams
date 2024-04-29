@@ -71,15 +71,12 @@ public:
 	message.angular.z = Kw * response.theta;
 	
 	publisher->publish(message);
-   
-
-    // request.uav = "uav1";
 
     // RCLCPP_INFO(this->get_logger(), "response.x: '%f'", response.x);
     // RCLCPP_INFO(this->get_logger(), "response.y: '%f'", response.y);
     // RCLCPP_INFO(this->get_logger(), "response.z: '%f'", response.z);
 
-    RCLCPP_INFO(this->get_logger(), "linear.x: '%f'", message.linear.x);
+    // RCLCPP_INFO(this->get_logger(), "linear.x: '%f'", message.linear.x);
     // RCLCPP_INFO(this->get_logger(), "linear.y: '%f'", message.linear.y);
     // RCLCPP_INFO(this->get_logger(), "linear.z: '%f'", message.linear.z);
   }
